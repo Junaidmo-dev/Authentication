@@ -59,7 +59,27 @@ export default function LoginPage() {
                             {state.errors?.password && <p className="text-red-500 text-xs">{state.errors.password[0]}</p>}
                         </div>
 
-                        {state.message && <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm text-center">{state.message}</div>}
+                        {state.message === 'USER_NOT_FOUND' ? (
+                            <div className="p-4 bg-zinc-900 border border-zinc-100/10 rounded-xl space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
+                                <div className="flex items-center gap-2 text-zinc-100">
+                                    <span className="material-symbols-outlined text-[20px]">person_off</span>
+                                    <p className="text-xs font-black uppercase tracking-widest italic">Account Not Registered</p>
+                                </div>
+                                <p className="text-zinc-400 text-[11px] leading-relaxed">
+                                    This signature does not exist in our secure registries. Would you like to initialize a new operator profile?
+                                </p>
+                                <Link
+                                    href="/signup"
+                                    className="block w-full text-center py-2 bg-zinc-100 text-zinc-900 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white transition-all shadow-lg"
+                                >
+                                    Initialize Account
+                                </Link>
+                            </div>
+                        ) : state.message && (
+                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm text-center">
+                                {state.message === 'Invalid credentials.' ? 'Credentials Verification Failed' : 'System Error: Unauthorized'}
+                            </div>
+                        )}
 
                         <div className="pt-2">
                             <button

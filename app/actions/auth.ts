@@ -100,7 +100,7 @@ export async function login(prevState: FormState, formData: FormData): Promise<F
 
         if (!user) {
             return {
-                message: 'Invalid credentials.',
+                message: 'USER_NOT_FOUND',
             };
         }
 
