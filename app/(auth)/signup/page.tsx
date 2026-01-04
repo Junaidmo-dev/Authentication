@@ -27,8 +27,8 @@ export default function SignupPage() {
                         <span className="material-symbols-outlined text-[32px]">person_add</span>
                     </div>
                     <div className="space-y-1">
-                        <h1 className="text-3xl font-black tracking-tighter uppercase italic">Create Account</h1>
-                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Join Secure Dashboard</p>
+                        <h1 className="text-3xl font-black tracking-tighter uppercase italic">Sign Up</h1>
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Create your account</p>
                     </div>
                 </div>
 

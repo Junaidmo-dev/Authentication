@@ -25,8 +25,8 @@ export default function LoginPage() {
                         <span className="material-symbols-outlined text-[32px]">shield</span>
                     </div>
                     <div className="space-y-1">
-                        <h1 className="text-3xl font-black tracking-tighter uppercase italic">Secure Registry</h1>
-                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Authorization Required</p>
+                        <h1 className="text-3xl font-black tracking-tighter uppercase italic">Login</h1>
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Welcome Back</p>
                     </div>
                 </div>
 
@@ -106,8 +106,8 @@ export default function LoginPage() {
 
                 <div className="mt-8 text-center space-y-4">
                     <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
-                        New Operator?
-                        <Link href="/signup" className="text-zinc-900 dark:text-zinc-100 hover:underline underline-offset-8 ml-2">Initialize Profile</Link>
+                        Don't have an account?
+                        <Link href="/signup" className="text-zinc-900 dark:text-zinc-100 hover:underline underline-offset-8 ml-2">Sign Up</Link>
                     </p>
                     <div className="flex items-center justify-center gap-4 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
                         <div className="flex items-center gap-2 opacity-30 group grayscale hover:grayscale-0 transition-all cursor-default">
