@@ -2,10 +2,10 @@
 
 import React, { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createNote, togglePinNote, deleteNote } from '../app/actions/notes';
+import { createNote, togglePinNote, deleteNote, updateNote } from '../app/actions/notes';
 import { reorderNotes } from '../app/actions/reorder';
 import ReactMarkdown from 'react-markdown';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import {
     DndContext,
     closestCenter,
@@ -31,8 +31,8 @@ interface Note {
     color: string;
     pinned: boolean;
     tags?: string;
-    createdAt: string;
-    updatedAt: string;
+    createdAt: string | Date;
+    updatedAt: string | Date;
     order?: number;
 }
 
@@ -42,24 +42,26 @@ interface NotesGridProps {
 
 const colorThemes: Record<string, string> = {
     default: 'border-zinc-200 dark:border-zinc-800',
-    blue: 'border-zinc-900 dark:border-zinc-100', // Making "blue" actually high contrast/inverted in this theme
+    blue: 'border-zinc-900 dark:border-zinc-100',
     green: 'border-emerald-500/50',
     yellow: 'border-amber-500/50',
     red: 'border-rose-500/50',
 };
 
-function SortableNoteCard({ note, onPin, onDelete }: { note: Note; onPin: (id: string) => void; onDelete: (id: string) => void }) {
+function SortableNoteCard({ note, onPin, onDelete, onEdit }: { note: Note; onPin: (id: string) => void; onDelete: (id: string) => void; onEdit: (note: Note) => void }) {
     const {
         attributes,
         listeners,
         setNodeRef,
         transform,
         transition,
+        isDragging
     } = useSortable({ id: note.id });
 
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
+        zIndex: isDragging ? 50 : 0
     };
 
     const borderClass = colorThemes[note.color] || colorThemes.default;
@@ -71,11 +73,18 @@ function SortableNoteCard({ note, onPin, onDelete }: { note: Note; onPin: (id: s
             style={style}
             {...attributes}
             {...listeners}
-            className={`group p-6 rounded-[2rem] bg-white dark:bg-zinc-900 border ${borderClass} shadow-soft hover:shadow-xl transition-all flex flex-col h-[280px] cursor-grab active:cursor-grabbing relative overflow-hidden`}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.2 }}
+            className={`group p-6 rounded-[2rem] bg-white dark:bg-zinc-900 border ${borderClass} ${isDragging ? 'shadow-2xl' : 'shadow-soft'} hover:shadow-xl transition-shadow flex flex-col h-[280px] cursor-grab active:cursor-grabbing relative overflow-hidden`}
         >
             <div className="flex items-start justify-between mb-4 relative z-10">
                 <h3 className="font-black text-sm text-zinc-900 dark:text-zinc-50 tracking-tight line-clamp-2 uppercase italic">{note.title}</h3>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onPointerDown={(e) => e.stopPropagation()}>
+                    <button onClick={() => onEdit(note)} className="p-1.5 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors">
+                        <span className="material-symbols-outlined text-[18px]">edit</span>
+                    </button>
                     <button onClick={() => onPin(note.id)} className="p-1.5 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors">
                         <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: note.pinned ? "'FILL' 1" : "'FILL' 0" }}>push_pin</span>
                     </button>
@@ -91,7 +100,7 @@ function SortableNoteCard({ note, onPin, onDelete }: { note: Note; onPin: (id: s
 
             <div className="mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center relative z-10">
                 <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
-                    ID: {note.id.slice(0, 8)}
+                    UPDATED: {new Date(note.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
                 {note.tags && (
                     <div className="flex gap-1">
@@ -102,7 +111,6 @@ function SortableNoteCard({ note, onPin, onDelete }: { note: Note; onPin: (id: s
                 )}
             </div>
 
-            {/* Subtle aesthetic number overlay */}
             <div className="absolute -bottom-4 -right-4 text-[100px] font-black opacity-[0.02] dark:opacity-[0.05] italic select-none pointer-events-none">
                 {note.order || 0}
             </div>
@@ -114,8 +122,8 @@ export default function NotesGrid({ initialNotes }: NotesGridProps) {
     const router = useRouter();
     const [notes, setNotes] = useState<Note[]>(initialNotes);
     const [isPending, startTransition] = useTransition();
-    const [isCreating, setIsCreating] = useState(false);
-    const [newNote, setNewNote] = useState({ title: '', content: '', color: 'default', tags: '' });
+    const [modalState, setModalState] = useState<{ type: 'create' | 'edit' | null, note?: Note }>({ type: null });
+    const [noteForm, setNoteForm] = useState({ title: '', content: '', color: 'default', tags: '' });
 
     useEffect(() => {
         setNotes(initialNotes);
@@ -142,20 +150,33 @@ export default function NotesGrid({ initialNotes }: NotesGridProps) {
         }
     };
 
-    const handleCreate = async (e: React.FormEvent) => {
+    const handleOpenEdit = (note: Note) => {
+        setNoteForm({ title: note.title, content: note.content, color: note.color, tags: note.tags || '' });
+        setModalState({ type: 'edit', note });
+    };
+
+    const handleOpenCreate = () => {
+        setNoteForm({ title: '', content: '', color: 'default', tags: '' });
+        setModalState({ type: 'create' });
+    };
+
+    const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newNote.title.trim()) return;
+        if (!noteForm.title.trim()) return;
 
         const formData = new FormData();
-        formData.append('title', newNote.title);
-        formData.append('content', newNote.content);
-        formData.append('color', newNote.color);
-        formData.append('tags', newNote.tags);
+        formData.append('title', noteForm.title);
+        formData.append('content', noteForm.content);
+        formData.append('color', noteForm.color);
+        formData.append('tags', noteForm.tags);
 
         startTransition(async () => {
-            await createNote(formData);
-            setNewNote({ title: '', content: '', color: 'default', tags: '' });
-            setIsCreating(false);
+            if (modalState.type === 'edit' && modalState.note) {
+                await updateNote(modalState.note.id, formData);
+            } else {
+                await createNote(formData);
+            }
+            setModalState({ type: null });
             router.refresh();
         });
     };
@@ -185,7 +206,7 @@ export default function NotesGrid({ initialNotes }: NotesGridProps) {
                     <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest">{notes.length} Active Records</p>
                 </div>
                 <button
-                    onClick={() => setIsCreating(true)}
+                    onClick={handleOpenCreate}
                     className="bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:opacity-90 transition-all shadow-xl flex items-center gap-3"
                 >
                     <span className="material-symbols-outlined text-[20px]">add_circle</span>
@@ -194,7 +215,7 @@ export default function NotesGrid({ initialNotes }: NotesGridProps) {
             </header>
 
             <AnimatePresence>
-                {isCreating && (
+                {modalState.type && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -202,21 +223,25 @@ export default function NotesGrid({ initialNotes }: NotesGridProps) {
                         className="fixed inset-0 bg-zinc-900/40 backdrop-blur-md flex items-center justify-center z-50 p-4"
                     >
                         <motion.form
-                            initial={{ scale: 0.9, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            onSubmit={handleCreate}
-                            className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-[3rem] p-10 shadow-2xl border border-zinc-100 dark:border-zinc-800 space-y-6"
+                            initial={{ scale: 0.95, y: 30, opacity: 0 }}
+                            animate={{ scale: 1, y: 0, opacity: 1 }}
+                            exit={{ scale: 0.95, y: 30, opacity: 0 }}
+                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                            onSubmit={handleFormSubmit}
+                            className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-[3.5rem] p-10 shadow-2xl border border-zinc-100 dark:border-zinc-800 space-y-6"
                         >
-                            <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 tracking-tighter uppercase italic">Create Data Node</h2>
+                            <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 tracking-tighter uppercase italic">
+                                {modalState.type === 'edit' ? 'Update Data Node' : 'Initialize Data Node'}
+                            </h2>
 
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Descriptor</label>
                                 <input
                                     type="text"
-                                    value={newNote.title}
-                                    onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
+                                    value={noteForm.title}
+                                    onChange={(e) => setNoteForm({ ...noteForm, title: e.target.value })}
                                     placeholder="Enter node title..."
-                                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl px-6 py-4 text-sm font-bold outline-none"
+                                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl px-6 py-4 text-sm font-bold outline-none ring-zinc-900 dark:ring-zinc-100 focus:ring-1"
                                     autoFocus
                                 />
                             </div>
@@ -224,11 +249,11 @@ export default function NotesGrid({ initialNotes }: NotesGridProps) {
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Information payload</label>
                                 <textarea
-                                    value={newNote.content}
-                                    onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
+                                    value={noteForm.content}
+                                    onChange={(e) => setNoteForm({ ...noteForm, content: e.target.value })}
                                     placeholder="Syntax: Markdown enabled..."
                                     rows={5}
-                                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl px-6 py-4 text-sm font-medium outline-none resize-none"
+                                    className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl px-6 py-4 text-sm font-medium outline-none ring-zinc-900 dark:ring-zinc-100 focus:ring-1 resize-none font-mono"
                                 />
                             </div>
 
@@ -237,9 +262,9 @@ export default function NotesGrid({ initialNotes }: NotesGridProps) {
                                     <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Tags</label>
                                     <input
                                         type="text"
-                                        value={newNote.tags}
-                                        onChange={(e) => setNewNote({ ...newNote, tags: e.target.value })}
-                                        className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl px-6 py-3 text-[11px] font-bold uppercase tracking-widest outline-none"
+                                        value={noteForm.tags}
+                                        onChange={(e) => setNoteForm({ ...noteForm, tags: e.target.value })}
+                                        className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl px-6 py-3 text-[11px] font-bold uppercase tracking-widest outline-none ring-zinc-900 dark:ring-zinc-100 focus:ring-1"
                                     />
                                 </div>
                                 <div className="flex gap-2 pb-2">
@@ -247,16 +272,18 @@ export default function NotesGrid({ initialNotes }: NotesGridProps) {
                                         <button
                                             key={color}
                                             type="button"
-                                            onClick={() => setNewNote({ ...newNote, color })}
-                                            className={`w-6 h-6 rounded-full border-2 border-zinc-200 dark:border-zinc-700 ${colorThemes[color].replace('border-', 'bg-')} ${newNote.color === color ? 'ring-2 ring-zinc-900 dark:ring-zinc-100' : ''}`}
+                                            onClick={() => setNoteForm({ ...noteForm, color })}
+                                            className={`w-6 h-6 rounded-full border-2 border-zinc-200 dark:border-zinc-700 ${colorThemes[color].replace('border-', 'bg-')} ${noteForm.color === color ? 'ring-2 ring-zinc-900 dark:ring-zinc-100 ring-offset-2 dark:ring-offset-zinc-900' : ''}`}
                                         />
                                     ))}
                                 </div>
                             </div>
 
                             <div className="flex gap-4 justify-end pt-6">
-                                <button type="button" onClick={() => setIsCreating(false)} className="px-6 py-3 text-[11px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors">Abort</button>
-                                <button type="submit" disabled={isPending || !newNote.title.trim()} className="bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 px-8 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em]">Commit</button>
+                                <button type="button" onClick={() => setModalState({ type: null })} className="px-6 py-3 text-[11px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors">Abort</button>
+                                <button type="submit" disabled={isPending || !noteForm.title.trim()} className="bg-zinc-900 dark:bg-zinc-50 text-zinc-50 dark:text-zinc-900 px-8 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-xl hover:scale-105 active:scale-95 transition-all">
+                                    {isPending ? 'Syncing...' : 'Commit'}
+                                </button>
                             </div>
                         </motion.form>
                     </motion.div>
@@ -265,47 +292,53 @@ export default function NotesGrid({ initialNotes }: NotesGridProps) {
 
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <div className="space-y-16">
-                    {pinnedNotes.length > 0 && (
-                        <section className="space-y-6">
-                            <div className="flex items-center gap-4">
-                                <div className="w-1.5 h-6 bg-zinc-900 dark:bg-zinc-100 rounded-full" />
-                                <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight uppercase italic">Strategic Intel</h2>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                <AnimatePresence mode="popLayout">
-                                    {pinnedNotes.map((note) => (
-                                        <SortableNoteCard key={note.id} note={note} onPin={handlePin} onDelete={handleDelete} />
-                                    ))}
-                                </AnimatePresence>
-                            </div>
-                        </section>
-                    )}
-
-                    {otherNotes.length > 0 && (
-                        <section className="space-y-6">
-                            <div className="flex items-center gap-4">
-                                <div className="w-1.5 h-6 bg-zinc-300 dark:bg-zinc-700 rounded-full" />
-                                <h2 className="text-xl font-black text-zinc-400 tracking-tight uppercase italic opacity-60">Archive Nodes</h2>
-                            </div>
-                            <SortableContext items={otherNotes} strategy={rectSortingStrategy}>
+                    <LayoutGroup>
+                        {pinnedNotes.length > 0 && (
+                            <section className="space-y-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-1.5 h-6 bg-zinc-900 dark:bg-zinc-100 rounded-full" />
+                                    <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight uppercase italic">Strategic Intel</h2>
+                                </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    <AnimatePresence mode="popLayout">
-                                        {otherNotes.map((note) => (
-                                            <SortableNoteCard key={note.id} note={note} onPin={handlePin} onDelete={handleDelete} />
+                                    <AnimatePresence mode="popLayout" initial={false}>
+                                        {pinnedNotes.map((note) => (
+                                            <SortableNoteCard key={note.id} note={note} onPin={handlePin} onDelete={handleDelete} onEdit={handleOpenEdit} />
                                         ))}
                                     </AnimatePresence>
                                 </div>
-                            </SortableContext>
-                        </section>
-                    )}
+                            </section>
+                        )}
+
+                        {otherNotes.length > 0 && (
+                            <section className="space-y-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-1.5 h-6 bg-zinc-300 dark:bg-zinc-700 rounded-full" />
+                                    <h2 className="text-xl font-black text-zinc-400 tracking-tight uppercase italic opacity-60">Archive Nodes</h2>
+                                </div>
+                                <SortableContext items={otherNotes} strategy={rectSortingStrategy}>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        <AnimatePresence mode="popLayout" initial={false}>
+                                            {otherNotes.map((note) => (
+                                                <SortableNoteCard key={note.id} note={note} onPin={handlePin} onDelete={handleDelete} onEdit={handleOpenEdit} />
+                                            ))}
+                                        </AnimatePresence>
+                                    </div>
+                                </SortableContext>
+                            </section>
+                        )}
+                    </LayoutGroup>
                 </div>
 
                 {notes.length === 0 && (
-                    <div className="text-center py-32 bg-zinc-50 dark:bg-zinc-900/50 rounded-[4rem] border border-dashed border-zinc-200 dark:border-zinc-800">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-center py-32 bg-zinc-50 dark:bg-zinc-900/50 rounded-[4rem] border border-dashed border-zinc-200 dark:border-zinc-800"
+                    >
                         <span className="material-symbols-outlined text-6xl text-zinc-300 dark:text-zinc-800 mb-6 opacity-40">database</span>
                         <p className="text-sm font-black uppercase tracking-[0.3em] text-zinc-400">Database Empty: No Nodes Initialized</p>
-                        <button onClick={() => setIsCreating(true)} className="mt-8 text-xs font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50 underline underline-offset-8">Draft Initial Directive</button>
-                    </div>
+                        <button onClick={handleOpenCreate} className="mt-8 text-xs font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-50 underline underline-offset-8">Draft Initial Directive</button>
+                    </motion.div>
                 )}
             </DndContext>
         </div>
