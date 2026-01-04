@@ -4,8 +4,8 @@ interface Todo {
     id: string;
     title: string;
     completed: boolean;
-    createdAt: string;
-    updatedAt: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 interface AnalyticsProps {
@@ -22,6 +22,7 @@ export default function ProductivityAnalytics({ todos }: AnalyticsProps) {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const weeklyCompleted = todos.filter(t => {
+        // Ensure we handle both Date objects and strings (if serialized)
         const completedDate = new Date(t.updatedAt);
         return t.completed && completedDate >= weekAgo;
     }).length;
