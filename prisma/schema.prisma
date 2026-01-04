@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role      String   @default("user") // "admin" or "user"
+  avatarUrl String?
+  todos     Todo[]
+  notes     Note[]
+}
+
+model Todo {
+  id        String    @id @default(cuid())
+  title     String
+  completed Boolean   @default(false)
+  priority  String    @default("medium") // low, medium, high
+  dueDate   DateTime?
+  order     Int       @default(0) // For Drag & Drop sorting
+  tags      String    @default("") // Comma separated tags (SQLite doesn't support arrays well, using string for broad compatibility, or we can use JSON)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  color     String   @default("default") // default, blue, green, yellow, red
+  pinned    Boolean  @default(false)
+  tags      String    @default("") // Comma separated tags
+  order     Int       @default(0) // For Drag & Drop sorting
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
