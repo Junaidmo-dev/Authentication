@@ -36,14 +36,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-background border-r border-border transform transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex flex-col h-full">
           {/* Logo Area */}
-          <div className="h-20 flex items-center px-8">
+          <Link href="/" className="h-20 flex items-center px-8 group">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-zinc-900 dark:bg-zinc-100 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-9 h-9 bg-zinc-900 dark:bg-zinc-100 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                 <span className="material-symbols-outlined text-zinc-100 dark:text-zinc-900 text-[20px]">terminal</span>
               </div>
-              <span className="font-black text-xl tracking-tighter uppercase italic">Secure</span>
+              <span className="font-black text-xl tracking-tighter uppercase italic group-hover:translate-x-1 transition-transform duration-300">Secure</span>
             </div>
-          </div>
+          </Link>
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-8 space-y-2">
