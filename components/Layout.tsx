@@ -25,7 +25,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navItems = [
     { path: '/', icon: 'grid_view', label: 'Dashboard' },
     { path: '/todos', icon: 'task_alt', label: 'Tasks' },
-    { path: '/notes', icon: 'notes', label: 'Knowledge' },
+    { path: '/notes', icon: 'notes', label: 'Notes' },
     { path: '/entities', icon: 'account_tree', label: 'Entities' },
     { path: '/profile', icon: 'settings', label: 'Preferences' },
   ];
