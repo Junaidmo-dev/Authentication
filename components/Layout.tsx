@@ -23,42 +23,42 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   const navItems = [
-    { path: '/', icon: 'dashboard', label: 'Dashboard' },
-    { path: '/todos', icon: 'check_circle', label: 'Todos' },
-    { path: '/notes', icon: 'description', label: 'Notes' }, // Changed icon to description for cleaner look
-    { path: '/entities', icon: 'folder_open', label: 'Projects' }, // Renamed to Projects
-    { path: '/profile', icon: 'person', label: 'Profile' },
+    { path: '/', icon: 'grid_view', label: 'Dashboard' },
+    { path: '/todos', icon: 'task_alt', label: 'Tasks' },
+    { path: '/notes', icon: 'notes', label: 'Knowledge' },
+    { path: '/entities', icon: 'account_tree', label: 'Entities' },
+    { path: '/profile', icon: 'settings', label: 'Preferences' },
   ];
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans">
-      {/* Sidebar - Minimalist */}
-      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-border transform transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      {/* Sidebar - Precision Engineered */}
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-background border-r border-border transform transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex flex-col h-full">
           {/* Logo Area */}
-          <div className="h-16 flex items-center px-6 border-b border-border/50">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-soft">
-                <span className="material-symbols-outlined text-white text-[20px]">verified_user</span>
+          <div className="h-20 flex items-center px-8">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-zinc-900 dark:bg-zinc-100 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="material-symbols-outlined text-zinc-100 dark:text-zinc-900 text-[20px]">terminal</span>
               </div>
-              <span className="font-bold text-lg tracking-tight">SecureDash</span>
+              <span className="font-black text-xl tracking-tighter uppercase italic">Secure</span>
             </div>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1">
-            <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Menu</p>
+          <nav className="flex-1 px-4 py-8 space-y-2">
+            <p className="px-4 text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-4">Operations</p>
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 href={item.path}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group ${isActive(item.path)
-                    ? 'bg-muted text-primary'
-                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 group ${isActive(item.path)
+                  ? 'bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 shadow-md'
+                  : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900'
                   }`}
               >
-                <span className={`material-symbols-outlined text-[20px] transition-colors ${isActive(item.path) ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`}>
+                <span className={`material-symbols-outlined text-[20px] ${isActive(item.path) ? '' : 'opacity-40 group-hover:opacity-100 transition-opacity'}`}>
                   {item.icon}
                 </span>
                 {item.label}
@@ -68,22 +68,22 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {/* User Profile Footer */}
           <div className="p-4 border-t border-border/50">
-            <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800 transition-all">
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-xs flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center text-zinc-100 dark:text-zinc-900 font-black text-[10px] flex-shrink-0">
                   {user?.name?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground truncate capitalize">{user?.role}</p>
+                  <p className="text-xs font-bold truncate tracking-tight">{user?.name}</p>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tighter truncate">{user?.role || 'Operator'}</p>
                 </div>
               </div>
               <button
                 onClick={handleLogout}
-                className="text-muted-foreground hover:text-destructive transition-colors p-1"
-                title="Logout"
+                className="text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors p-1"
+                title="Terminate Session"
               >
-                <span className="material-symbols-outlined text-[20px]">logout</span>
+                <span className="material-symbols-outlined text-[18px]">power_settings_new</span>
               </button>
             </div>
           </div>
@@ -92,43 +92,35 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 relative">
-        {/* Header - Glassmorphism */}
-        <header className="h-16 glass flex items-center justify-between px-4 md:px-8 z-30 sticky top-0">
+        {/* Header - Sharp Minimal */}
+        <header className="h-16 flex items-center justify-between px-6 md:px-10 z-30 sticky top-0 bg-background/80 backdrop-blur-md">
           <div className="flex items-center gap-4">
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden text-muted-foreground hover:text-foreground">
-              <span className="material-symbols-outlined">menu</span>
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden text-zinc-500 hover:text-zinc-900">
+              <span className="material-symbols-outlined">menu_open</span>
             </button>
-            <h1 className="text-sm font-medium text-muted-foreground hidden md:block">
+            <div className="h-4 w-[1px] bg-zinc-200 dark:bg-zinc-800 hidden md:block mx-2" />
+            <h1 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hidden md:block">
               {navItems.find(i => isActive(i.path))?.label || 'Dashboard'}
             </h1>
           </div>
 
-          <div className="flex items-center gap-4">
-            {/* Search Bar - Minimalist */}
-            <div className="hidden md:flex relative group">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors material-symbols-outlined text-[18px]">search</span>
-              <input
-                type="text"
-                placeholder="Search..."
-                className="h-9 w-64 pl-9 pr-4 rounded-lg bg-muted/50 border-none text-sm focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground"
-              />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
-                <kbd className="hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                  <span className="text-xs">⌘</span>K
-                </kbd>
-              </div>
+          <div className="flex items-center gap-6">
+            {/* Simple Status Indicator */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-200 dark:border-zinc-800">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">System Live</span>
             </div>
 
-            <button className="relative p-2 text-muted-foreground hover:text-foreground transition-colors">
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full border-2 border-background"></span>
+            <button className="relative p-1 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+              <span className="material-symbols-outlined text-[22px]">notifications</span>
+              <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-zinc-900 dark:bg-zinc-100 rounded-full"></span>
             </button>
           </div>
         </header>
 
         {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
-          <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <main className="flex-1 overflow-y-auto p-6 md:p-10">
+          <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-700">
             {children}
           </div>
         </main>
@@ -136,7 +128,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
+        <div className="fixed inset-0 bg-black/20 z-30 md:hidden backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
       )}
     </div>
   );

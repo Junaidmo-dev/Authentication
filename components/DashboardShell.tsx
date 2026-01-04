@@ -6,32 +6,30 @@ import { ReactNode } from 'react';
 export default function DashboardShell({ children }: { children: ReactNode }) {
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="space-y-8"
+            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+            className="space-y-10"
         >
             {children}
         </motion.div>
     );
 }
 
-export function DashboardHeader({ greeting, name, onCreateTodo }: { greeting: string, name: string, onCreateTodo?: () => void }) {
+export function DashboardHeader({ greeting, name }: { greeting: string, name: string }) {
     return (
         <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="flex flex-col md:flex-row md:items-end justify-between gap-4"
+            transition={{ delay: 0.1, duration: 0.4 }}
+            className="flex flex-col gap-1"
         >
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
-                    {greeting}, <span className="text-indigo-600 dark:text-indigo-400">{name}</span>
-                </h1>
-                <p className="text-slate-500 dark:text-slate-400">
-                    Ready to conquer your day? Here's your overview.
-                </p>
-            </div>
+            <h1 className="text-4xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
+                {greeting}, <span className="text-zinc-500">{name}</span>
+            </h1>
+            <p className="text-sm font-medium text-zinc-400 max-w-md">
+                Systems status optimal. Here is your situational overview for today.
+            </p>
         </motion.div>
     );
 }

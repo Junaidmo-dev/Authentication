@@ -22,7 +22,6 @@ export default function ProductivityAnalytics({ todos }: AnalyticsProps) {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const weeklyCompleted = todos.filter(t => {
-        // Ensure we handle both Date objects and strings (if serialized)
         const completedDate = new Date(t.updatedAt);
         return t.completed && completedDate >= weekAgo;
     }).length;
@@ -74,87 +73,76 @@ export default function ProductivityAnalytics({ todos }: AnalyticsProps) {
     const mostProductiveDay = findMostProductiveDay();
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Productivity Analytics</h2>
-                <span className="material-symbols-outlined text-slate-400">insights</span>
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-8 shadow-soft">
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Analytics</h2>
+                    <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest mt-1">Performance Overview</p>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
+                    <span className="material-symbols-outlined text-zinc-400 text-lg">monitoring</span>
+                </div>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Completion Rate */}
-                <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                            <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[18px]">percent</span>
-                        </div>
-                        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Completion Rate</span>
+                <div className="group">
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Completion</p>
+                    <div className="flex items-baseline gap-1">
+                        <span className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tighter">{completionRate}</span>
+                        <span className="text-sm font-medium text-zinc-500">%</span>
                     </div>
-                    <div className="flex items-end gap-1">
-                        <span className="text-3xl font-bold text-slate-900 dark:text-white">{completionRate}</span>
-                        <span className="text-lg text-slate-500 dark:text-slate-400 mb-1">%</span>
-                    </div>
-                    <div className="mt-2 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div className="mt-3 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                         <div
-                            className="h-full bg-blue-600 dark:bg-blue-500 rounded-full transition-all duration-500"
+                            className="h-full bg-zinc-900 dark:bg-zinc-100 transition-all duration-700 ease-out group-hover:bg-blue-500"
                             style={{ width: `${completionRate}%` }}
                         />
                     </div>
                 </div>
 
                 {/* Weekly Completed */}
-                <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                            <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-[18px]">check_circle</span>
-                        </div>
-                        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">This Week</span>
+                <div>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Weekly</p>
+                    <div className="flex items-baseline gap-1">
+                        <span className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tighter">{weeklyCompleted}</span>
+                        <span className="text-sm font-medium text-zinc-500">Done</span>
                     </div>
-                    <div className="flex items-end gap-1">
-                        <span className="text-3xl font-bold text-slate-900 dark:text-white">{weeklyCompleted}</span>
-                        <span className="text-sm text-slate-500 dark:text-slate-400 mb-1">tasks</span>
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Last 7 days</p>
+                    <p className="text-[11px] text-zinc-400 mt-2 font-medium">Last 7 calendar days</p>
                 </div>
 
                 {/* Streak */}
-                <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                            <span className="material-symbols-outlined text-orange-600 dark:text-orange-400 text-[18px]">local_fire_department</span>
-                        </div>
-                        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Current Streak</span>
+                <div>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Streak</p>
+                    <div className="flex items-baseline gap-1">
+                        <span className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tighter">{streak}</span>
+                        <span className="text-sm font-medium text-zinc-500">Days</span>
                     </div>
-                    <div className="flex items-end gap-1">
-                        <span className="text-3xl font-bold text-slate-900 dark:text-white">{streak}</span>
-                        <span className="text-sm text-slate-500 dark:text-slate-400 mb-1">days</span>
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                        {streak > 0 ? 'Keep it up! 🔥' : 'Start your streak today!'}
-                    </p>
+                    <p className="text-[11px] text-zinc-400 mt-2 font-medium">Consecutive activity</p>
                 </div>
 
-                {/* Most Productive Day */}
-                <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                            <span className="material-symbols-outlined text-purple-600 dark:text-purple-400 text-[18px]">calendar_today</span>
-                        </div>
-                        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Best Day</span>
+                {/* Best Day */}
+                <div>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Peak Flow</p>
+                    <div className="flex items-baseline gap-1 overflow-hidden">
+                        <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tighter truncate">{mostProductiveDay.day}</span>
                     </div>
-                    <div className="flex items-end gap-1">
-                        <span className="text-2xl font-bold text-slate-900 dark:text-white">{mostProductiveDay.day}</span>
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                        {mostProductiveDay.count > 0 ? `${mostProductiveDay.count} tasks completed` : 'Complete more to find out!'}
-                    </p>
+                    <p className="text-[11px] text-zinc-400 mt-3 font-medium">Most active weekday</p>
                 </div>
             </div>
 
-            {/* Mini Chart - Last 7 Days */}
-            <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
-                <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Last 7 Days Activity</h3>
-                <div className="flex items-end justify-between gap-2 h-24">
+            {/* Mini Chart - High End Style */}
+            <div className="mt-10 pt-8 border-t border-zinc-100 dark:border-zinc-800">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">7-Day Activity</h3>
+                    <div className="flex gap-4">
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-zinc-900 dark:bg-zinc-100" />
+                            <span className="text-[10px] font-medium text-zinc-500">Activity</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex items-end justify-between gap-3 h-20">
                     {Array.from({ length: 7 }).map((_, i) => {
                         const date = new Date();
                         date.setDate(date.getDate() - (6 - i));
@@ -169,22 +157,21 @@ export default function ProductivityAnalytics({ todos }: AnalyticsProps) {
                         }).length;
 
                         const maxHeight = 100;
-                        const height = dayCompleted > 0 ? Math.max(20, (dayCompleted / 5) * maxHeight) : 8;
+                        const height = dayCompleted > 0 ? Math.max(15, Math.min(100, (dayCompleted / 3) * maxHeight)) : 4;
 
                         return (
-                            <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                                <div className="w-full flex items-end justify-center" style={{ height: '80px' }}>
+                            <div key={i} className="flex-1 flex flex-col items-center group">
+                                <div className="w-full flex items-end justify-center" style={{ height: '60px' }}>
                                     <div
-                                        className={`w-full rounded-t transition-all ${dayCompleted > 0
-                                                ? 'bg-blue-500 dark:bg-blue-400'
-                                                : 'bg-slate-200 dark:bg-slate-700'
+                                        className={`w-full rounded-sm transition-all duration-300 ${dayCompleted > 0
+                                                ? 'bg-zinc-900 dark:bg-zinc-100 group-hover:bg-zinc-600 dark:group-hover:bg-zinc-400'
+                                                : 'bg-zinc-100 dark:bg-zinc-800'
                                             }`}
                                         style={{ height: `${height}%` }}
-                                        title={`${dayCompleted} tasks`}
                                     />
                                 </div>
-                                <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                                    {date.toLocaleDateString('en-US', { weekday: 'short' })[0]}
+                                <span className="text-[9px] font-bold text-zinc-400 mt-3 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors">
+                                    {date.toLocaleDateString('en-US', { weekday: 'short' })[0].toUpperCase()}
                                 </span>
                             </div>
                         );

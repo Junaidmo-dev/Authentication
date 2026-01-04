@@ -16,7 +16,7 @@ export default function QuickAddTodo() {
         setIsPending(true);
         const formData = new FormData();
         formData.append('title', title);
-        formData.append('priority', 'medium'); // Default priority
+        formData.append('priority', 'medium');
 
         await createTodo(formData);
 
@@ -34,47 +34,48 @@ export default function QuickAddTodo() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={() => setIsExpanded(true)}
-                        className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-left shadow-sm hover:shadow-md transition-shadow group flex items-center justify-between"
+                        className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 text-left shadow-soft hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group flex items-center justify-between"
                     >
-                        <span className="text-slate-400 group-hover:text-slate-500 transition-colors">
-                            Quickly add a new task...
-                        </span>
-                        <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                            <span className="material-symbols-outlined text-sm">add</span>
+                        <div className="flex items-center gap-3">
+                            <span className="material-symbols-outlined text-zinc-400 text-[20px] group-hover:text-zinc-600 transition-colors">add_circle</span>
+                            <span className="text-zinc-500 text-sm font-medium">Quickly add a task...</span>
                         </div>
+                        <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-1.5 font-mono text-[10px] font-medium text-zinc-400">
+                            <span className="text-xs">⌘</span>N
+                        </kbd>
                     </motion.button>
                 ) : (
                     <motion.form
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
                         onSubmit={handleSubmit}
-                        className="bg-white dark:bg-slate-800 border-2 border-indigo-500/20 dark:border-indigo-500/30 rounded-xl p-4 shadow-lg"
+                        className="bg-white dark:bg-zinc-900 border border-zinc-900 dark:border-zinc-100 rounded-xl p-3 shadow-xl"
                     >
-                        <div className="flex gap-2">
+                        <div className="flex flex-col gap-3">
                             <input
                                 autoFocus
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder="What needs to be done?"
-                                className="flex-1 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none"
+                                className="w-full bg-transparent text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 outline-none text-sm font-medium px-1"
                                 disabled={isPending}
                             />
-                            <div className="flex gap-2">
+                            <div className="flex justify-end items-center gap-2">
                                 <button
                                     type="button"
                                     onClick={() => setIsExpanded(false)}
-                                    className="px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                                    className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isPending || !title.trim()}
-                                    className="bg-indigo-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                                    className="bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 px-4 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider hover:opacity-90 disabled:opacity-30 transition-all"
                                 >
-                                    {isPending ? 'Adding...' : 'Add Task'}
+                                    {isPending ? 'Saving...' : 'Add Now'}
                                 </button>
                             </div>
                         </div>
