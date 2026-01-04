@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Layout } from '../../components/Layout';
-import { ProtectedRoute } from '../../components/ProtectedRoute';
 
 export default function DashboardLayout({
     children,
@@ -10,10 +9,8 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     return (
-        <ProtectedRoute>
-            <Layout>
-                {children}
-            </Layout>
-        </ProtectedRoute>
+        <Layout>
+            {children}
+        </Layout>
     );
 }

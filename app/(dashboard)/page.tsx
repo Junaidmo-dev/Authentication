@@ -30,12 +30,12 @@ export default async function DashboardPage() {
 
     const { todos, notes, user } = data;
 
-    const pendingTodos = todos.filter(t => !t.completed);
-    const pinnedNotes = notes.filter(n => n.pinned);
+    const pendingTodos = todos.filter((t: any) => !t.completed);
+    const pinnedNotes = notes.filter((n: any) => n.pinned);
     const firstName = user.name?.split(' ')[0] || 'User';
 
     // Find the single absolute highest priority task for Focus Card
-    const focusTask = pendingTodos.find(t => t.priority === 'high') || pendingTodos[0];
+    const focusTask = pendingTodos.find((t: any) => t.priority === 'high') || pendingTodos[0];
 
     // Get time of day greeting based on server time (user local time better handled client side but this is OK)
     const hour = new Date().getHours();
@@ -98,7 +98,7 @@ export default async function DashboardPage() {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {pinnedNotes.length > 0 ? (
-                                pinnedNotes.slice(0, 4).map(note => (
+                                pinnedNotes.slice(0, 4).map((note: any) => (
                                     <div key={note.id} className="p-4 rounded-lg bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors shadow-sm group">
                                         <h4 className="font-medium text-sm text-slate-900 dark:text-slate-100 mb-1 line-clamp-1 group-hover:text-indigo-600 transition-colors">{note.title}</h4>
                                         <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{note.content || 'No content'}</p>
@@ -124,7 +124,7 @@ export default async function DashboardPage() {
                         <div className="p-2 flex-1 overflow-y-auto max-h-[500px]">
                             {pendingTodos.length > 0 ? (
                                 <ul className="space-y-1">
-                                    {pendingTodos.slice(0, 8).map(todo => (
+                                    {pendingTodos.slice(0, 8).map((todo: any) => (
                                         <li key={todo.id} className="group p-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg transition-all flex items-start gap-3 border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
                                             <div className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${todo.priority === 'high' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]' :
                                                 todo.priority === 'medium' ? 'bg-amber-500' : 'bg-green-500'

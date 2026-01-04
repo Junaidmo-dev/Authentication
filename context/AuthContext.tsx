@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { User, AuthContextType } from '../types';
 import { logout as logoutAction } from '../app/actions/auth';
 
@@ -10,6 +11,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const pathname = usePathname();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -31,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
     checkAuth();
-  }, []);
+  }, [pathname]);
 
   // Login and Register are now handled by Server Actions directly in the pages
   const login = async () => {
