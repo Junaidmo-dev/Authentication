@@ -3,6 +3,7 @@ import { getTodos } from '../actions/todos';
 import { getNotes } from '../actions/notes';
 import { verifySession } from '../../lib/session';
 import { prisma } from '../../lib/prisma';
+import ProductivityAnalytics from '../../components/ProductivityAnalytics';
 
 async function getDashboardData() {
     const session = await verifySession();
@@ -81,6 +82,9 @@ export default async function DashboardPage() {
                 />
             </div>
 
+            {/* Productivity Analytics Widget */}
+            <ProductivityAnalytics todos={todos} />
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Recent Tasks Widget */}
                 <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col h-full">
@@ -94,7 +98,7 @@ export default async function DashboardPage() {
                                 {pendingTodos.slice(0, 5).map(todo => (
                                     <li key={todo.id} className="p-3 hover:bg-slate-50 dark:hover:bg-slate-700/30 rounded-lg transition-colors flex items-center gap-3">
                                         <div className={`w-2 h-2 rounded-full flex-shrink-0 ${todo.priority === 'high' ? 'bg-red-500' :
-                                                todo.priority === 'medium' ? 'bg-amber-500' : 'bg-green-500'
+                                            todo.priority === 'medium' ? 'bg-amber-500' : 'bg-green-500'
                                             }`} />
                                         <span className="text-sm font-medium text-slate-700 dark:text-slate-200 line-clamp-1 flex-1">{todo.title}</span>
                                         {todo.dueDate && (
