@@ -24,54 +24,48 @@ export const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({ pa
         setStrength(score);
     }, [password]);
 
-    const getColor = () => {
-        switch (strength) {
-            case 0: return 'bg-slate-200 dark:bg-slate-700';
-            case 1: return 'bg-red-500';
-            case 2: return 'bg-orange-500';
-            case 3: return 'bg-yellow-500';
-            case 4: return 'bg-emerald-500';
-            default: return 'bg-slate-200';
-        }
+    const getStrengthLevel = () => {
+        if (strength === 0) return { label: 'Incomplete', class: 'bg-zinc-200 dark:bg-zinc-800' };
+        if (strength <= 2) return { label: 'Weak', class: 'bg-rose-500' };
+        if (strength === 3) return { label: 'Medium', class: 'bg-amber-500' };
+        return { label: 'Strong', class: 'bg-emerald-500' };
     };
 
-    const getLabel = () => {
-        switch (strength) {
-            case 0: return 'Very Weak';
-            case 1: return 'Weak';
-            case 2: return 'Fair';
-            case 3: return 'Good';
-            case 4: return 'Strong';
-            default: return '';
-        }
-    };
+    const level = getStrengthLevel();
 
     return (
-        <div className="mt-2">
-            <div className="flex justify-between items-center mb-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400">Password Strength</span>
-                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{getLabel()}</span>
+        <div className="mt-4 space-y-3">
+            <div className="flex justify-between items-center">
+                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Entropy Analysis</span>
+                <span className={`text-[9px] font-black uppercase tracking-widest ${strength === 4 ? 'text-emerald-500' : 'text-zinc-500'}`}>{level.label}</span>
             </div>
-            <div className="flex gap-1 h-1 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className={`h-full flex-1 transition-all duration-300 ${strength >= 1 ? getColor() : ''}`}></div>
-                <div className={`h-full flex-1 transition-all duration-300 ${strength >= 2 ? getColor() : ''}`}></div>
-                <div className={`h-full flex-1 transition-all duration-300 ${strength >= 3 ? getColor() : ''}`}></div>
-                <div className={`h-full flex-1 transition-all duration-300 ${strength >= 4 ? getColor() : ''}`}></div>
+            <div className="flex gap-1.5 h-1.5 w-full bg-zinc-100 dark:bg-zinc-800/50 rounded-full overflow-hidden">
+                {[1, 2, 3, 4].map((step) => (
+                    <div
+                        key={step}
+                        className={`h-full flex-1 transition-all duration-500 rounded-full ${strength >= step ? level.class : 'bg-transparent'}`}
+                    ></div>
+                ))}
             </div>
-            <ul className="mt-2 space-y-1">
-                <li className={`text-[10px] flex items-center gap-1 ${password.length > 7 ? 'text-emerald-500' : 'text-slate-400'}`}>
-                    <span className="material-symbols-outlined text-[10px]">{password.length > 7 ? 'check' : 'circle'}</span> 8+ Characters
-                </li>
-                <li className={`text-[10px] flex items-center gap-1 ${/[A-Z]/.test(password) ? 'text-emerald-500' : 'text-slate-400'}`}>
-                    <span className="material-symbols-outlined text-[10px]">{/[A-Z]/.test(password) ? 'check' : 'circle'}</span> Uppercase
-                </li>
-                <li className={`text-[10px] flex items-center gap-1 ${/[0-9]/.test(password) ? 'text-emerald-500' : 'text-slate-400'}`}>
-                    <span className="material-symbols-outlined text-[10px]">{/[0-9]/.test(password) ? 'check' : 'circle'}</span> Numbers
-                </li>
-                <li className={`text-[10px] flex items-center gap-1 ${/[^A-Za-z0-9]/.test(password) ? 'text-emerald-500' : 'text-slate-400'}`}>
-                    <span className="material-symbols-outlined text-[10px]">{/[^A-Za-z0-9]/.test(password) ? 'check' : 'circle'}</span> Special Char
-                </li>
-            </ul>
+
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 pt-1">
+                <div className={`flex items-center gap-2 transition-colors ${password.length > 7 ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400'}`}>
+                    <div className={`w-1 h-1 rounded-full ${password.length > 7 ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
+                    <span className="text-[8px] font-black uppercase tracking-widest">Length [8+]</span>
+                </div>
+                <div className={`flex items-center gap-2 transition-colors ${/[A-Z]/.test(password) ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400'}`}>
+                    <div className={`w-1 h-1 rounded-full ${/[A-Z]/.test(password) ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
+                    <span className="text-[8px] font-black uppercase tracking-widest">Case [A-Z]</span>
+                </div>
+                <div className={`flex items-center gap-2 transition-colors ${/[0-9]/.test(password) ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400'}`}>
+                    <div className={`w-1 h-1 rounded-full ${/[0-9]/.test(password) ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
+                    <span className="text-[8px] font-black uppercase tracking-widest">Numeric [0-9]</span>
+                </div>
+                <div className={`flex items-center gap-2 transition-colors ${/[^A-Za-z0-9]/.test(password) ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400'}`}>
+                    <div className={`w-1 h-1 rounded-full ${/[^A-Za-z0-9]/.test(password) ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
+                    <span className="text-[8px] font-black uppercase tracking-widest">Symbol [#$!]</span>
+                </div>
+            </div>
         </div>
     );
 };
